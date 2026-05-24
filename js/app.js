@@ -65,8 +65,63 @@ const resultHoldCheckEl = document.getElementById('resultHoldCheck');
 const claimBtn = document.getElementById('claimBtn');
 const claimSoonNote = document.getElementById('claimSoonNote');
 
+const HEADER_SCROLL_OFFSET = 80;
+
 initWalletDiscovery();
 bindUiEvents();
+initAnchorNavigation();
+
+function prefersReducedMotion() {
+  return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+}
+
+function scrollToHash(hash, { updateHistory = true } = {}) {
+  const behavior = prefersReducedMotion() ? 'auto' : 'smooth';
+
+  if (!hash || hash === '#' || hash === '#top') {
+    window.scrollTo({ top: 0, left: 0, behavior });
+    if (updateHistory) {
+      history.pushState(null, '', hash === '#' ? `${window.location.pathname}${window.location.search}` : '#top');
+    }
+    return;
+  }
+
+  const target = document.querySelector(hash);
+  if (!target) return;
+
+  const top = target.getBoundingClientRect().top + window.scrollY - HEADER_SCROLL_OFFSET;
+  window.scrollTo({ top: Math.max(0, top), left: 0, behavior });
+  if (updateHistory) history.pushState(null, '', hash);
+}
+
+function initAnchorNavigation() {
+  document.querySelectorAll('a[href^="#"]').forEach((link) => {
+    link.addEventListener('click', (event) => {
+      const hash = link.getAttribute('href');
+      if (!hash) return;
+
+      const isTop = hash === '#top';
+      const target = isTop ? document.getElementById('top') : document.querySelector(hash);
+      if (!target) return;
+
+      event.preventDefault();
+      scrollToHash(hash);
+      mobileNav?.classList.remove('open');
+    });
+  });
+
+  window.addEventListener('hashchange', () => {
+    scrollToHash(window.location.hash, { updateHistory: false });
+  });
+
+  if (window.location.hash) {
+    const hash = window.location.hash;
+    window.scrollTo(0, 0);
+    requestAnimationFrame(() => {
+      scrollToHash(hash, { updateHistory: false });
+    });
+  }
+}
 
 function initWalletDiscovery() {
   window.addEventListener('eip6963:announceProvider', (event) => {
@@ -80,9 +135,6 @@ function initWalletDiscovery() {
 
 function bindUiEvents() {
   menuToggle?.addEventListener('click', () => mobileNav.classList.toggle('open'));
-  mobileNav?.querySelectorAll('a').forEach((link) => {
-    link.addEventListener('click', () => mobileNav.classList.remove('open'));
-  });
 
   copyContractBtn?.addEventListener('click', copyContractAddress);
   connectBtn?.addEventListener('click', openWalletPicker);
