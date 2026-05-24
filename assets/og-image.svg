@@ -1,25 +1,53 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img" aria-label="ShibArmy Loyalty Airdrop">
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img" aria-label="$SHIB Loyalty Rewards">
   <defs>
     <linearGradient id="bg" x1="0" y1="0" x2="1200" y2="630" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#0a0a0b"/>
-      <stop offset="1" stop-color="#161618"/>
+      <stop stop-color="#0d0f1a"/>
+      <stop offset="1" stop-color="#12141f"/>
     </linearGradient>
-    <linearGradient id="glow" x1="900" y1="0" x2="1200" y2="300" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#f7931a" stop-opacity="0.35"/>
-      <stop offset="1" stop-color="#f7931a" stop-opacity="0"/>
-    </linearGradient>
-    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="1">
-      <stop stop-color="#f7931a"/>
-      <stop offset="1" stop-color="#ffa940"/>
+    <radialGradient id="glowR" cx="85%" cy="20%" r="45%">
+      <stop stop-color="#d10032" stop-opacity="0.35"/>
+      <stop offset="1" stop-color="#d10032" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="glowO" cx="70%" cy="75%" r="40%">
+      <stop stop-color="#ec7700" stop-opacity="0.22"/>
+      <stop offset="1" stop-color="#ec7700" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="shib" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#d10032"/>
+      <stop offset="0.55" stop-color="#ec7700"/>
+      <stop offset="1" stop-color="#fda638"/>
     </linearGradient>
   </defs>
   <rect width="1200" height="630" fill="url(#bg)"/>
-  <ellipse cx="1050" cy="120" rx="280" ry="200" fill="url(#glow)"/>
-  <rect x="80" y="80" width="88" height="88" rx="22" fill="#161618" stroke="url(#accent)" stroke-width="2"/>
-  <path fill="url(#accent)" d="M124 108c-2.2 0-4.2.7-5.9 2-2.7-2.7-6.9-3.3-10.1-1-3.2 2.3-4.1 6.6-2.2 10.1-3.6 1.6-6 5.2-6 9.3 0 2.5.9 4.8 2.5 6.6-.5 1.4-.7 3-.3 4.6 1.1 4.3 5 7.3 9.5 7.3.7 0 1.4-.1 2.1-.2 1.4 2.8 4.5 4.8 7.9 4.8s6.5-2 7.9-4.8c.7.1 1.4.2 2.1.2 4.5 0 8.4-3 9.5-7.3.4-1.6.2-3.2-.3-4.6 1.6-1.8 2.5-4.1 2.5-6.6 0-4.1-2.4-7.7-6-9.3 2-3.5 1.1-7.8-2.2-10.1-3.2-2.3-7.4-1.7-10.1 1-1.7-1.3-3.7-2-5.9-2Z"/>
-  <text x="200" y="175" fill="#f5f5f7" font-family="system-ui,-apple-system,sans-serif" font-size="56" font-weight="800">ShibArmy Loyalty Airdrop</text>
-  <text x="200" y="235" fill="#a1a1aa" font-family="system-ui,-apple-system,sans-serif" font-size="28" font-weight="500">Rewards for loyal $SHIB holders</text>
-  <rect x="200" y="280" width="120" height="4" rx="2" fill="url(#accent)"/>
-  <text x="200" y="340" fill="#71717a" font-family="system-ui,-apple-system,sans-serif" font-size="22">10,000+ $SHIB · 6+ months · Ethereum mainnet</text>
-  <text x="200" y="520" fill="#f7931a" font-family="system-ui,-apple-system,sans-serif" font-size="20" font-weight="600">On-chain verified · Free eligibility check</text>
+  <rect width="1200" height="630" fill="url(#glowR)"/>
+  <rect width="1200" height="630" fill="url(#glowO)"/>
+  <rect x="0" y="0" width="1200" height="4" fill="url(#shib)"/>
+
+  <!-- SHIB icon mark -->
+  <circle cx="120" cy="120" r="52" fill="#161822" stroke="url(#shib)" stroke-width="2"/>
+  <path fill="url(#shib)" transform="translate(78,78) scale(1.65)" d="M16 8c-2.2 0-4.2.7-5.9 2-2.7-2.7-6.9-3.3-10.1-1-3.2 2.3-4.1 6.6-2.2 10.1-3.6 1.6-6 5.2-6 9.3 0 2.5.9 4.8 2.5 6.6-.5 1.4-.7 3-.3 4.6 1.1 4.3 5 7.3 9.5 7.3.7 0 1.4-.1 2.1-.2 1.4 2.8 4.5 4.8 7.9 4.8s6.5-2 7.9-4.8c.7.1 1.4.2 2.1.2 4.5 0 8.4-3 9.5-7.3.4-1.6.2-3.2-.3-4.6 1.6-1.8 2.5-4.1 2.5-6.6 0-4.1-2.4-7.7-6-9.3 2-3.5 1.1-7.8-2.2-10.1-3.2-2.3-7.4-1.7-10.1 1-1.7-1.3-3.7-2-5.9-2Z"/>
+
+  <text x="200" y="108" fill="#fafafa" font-family="Inter Tight, Inter, system-ui, sans-serif" font-size="34" font-weight="700" letter-spacing="-0.02em">$SHIB</text>
+  <text x="200" y="168" fill="#fafafa" font-family="Inter Tight, Inter, system-ui, sans-serif" font-size="54" font-weight="800" letter-spacing="-0.03em">Loyalty Rewards</text>
+  <text x="200" y="222" fill="#a1a1aa" font-family="Inter, system-ui, sans-serif" font-size="26" font-weight="500">Born from a vision. Built by the people.</text>
+
+  <rect x="200" y="252" width="140" height="4" rx="2" fill="url(#shib)"/>
+
+  <text x="200" y="310" fill="#d4d4d8" font-family="Inter, system-ui, sans-serif" font-size="22" font-weight="500">10,000+ $SHIB · 6+ months · Ethereum mainnet</text>
+  <text x="200" y="352" fill="#71717a" font-family="Inter, system-ui, sans-serif" font-size="20">On-chain verified eligibility · Free wallet check</text>
+
+  <!-- Trust badges -->
+  <rect x="200" y="400" width="210" height="44" rx="10" fill="#161822" stroke="#2a2d3a"/>
+  <text x="220" y="428" fill="#fda638" font-family="Inter, system-ui, sans-serif" font-size="16" font-weight="600">? Official ERC-20 contract</text>
+  <rect x="430" y="400" width="180" height="44" rx="10" fill="#161822" stroke="#2a2d3a"/>
+  <text x="450" y="428" fill="#fda638" font-family="Inter, system-ui, sans-serif" font-size="16" font-weight="600">? No seed phrase</text>
+
+  <text x="200" y="540" fill="#ec7700" font-family="Inter, system-ui, sans-serif" font-size="18" font-weight="600">shibarewards.com</text>
+  <text x="200" y="572" fill="#52525b" font-family="Inter, system-ui, sans-serif" font-size="16">Rewards for loyal ShibArmy holders</text>
+
+  <!-- Decorative ring -->
+  <circle cx="980" cy="315" r="180" fill="none" stroke="url(#shib)" stroke-width="2" opacity="0.25"/>
+  <circle cx="980" cy="315" r="130" fill="none" stroke="url(#shib)" stroke-width="1.5" opacity="0.18"/>
+  <circle cx="980" cy="315" r="72" fill="#161822" stroke="url(#shib)" stroke-width="2"/>
+  <text x="980" y="328" text-anchor="middle" fill="url(#shib)" font-family="Inter Tight, Inter, system-ui, sans-serif" font-size="42" font-weight="800">$</text>
 </svg>

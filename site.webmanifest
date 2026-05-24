@@ -1,17 +1,39 @@
 {
-  "name": "ShibArmy Loyalty Airdrop",
-  "short_name": "$SHIB Airdrop",
-  "description": "On-chain verified rewards for Shiba Inu ($SHIB) holders with 6+ months hold time.",
+  "name": "$SHIB Loyalty Rewards",
+  "short_name": "$SHIB",
+  "description": "On-chain verified loyalty rewards for $SHIB holders. 10,000+ tokens held continuously for 6+ months on Ethereum.",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
-  "background_color": "#0A0A0A",
-  "theme_color": "#0A0A0A",
+  "orientation": "portrait-primary",
+  "background_color": "#0d0f1a",
+  "theme_color": "#0d0f1a",
+  "lang": "en-US",
+  "categories": ["finance", "utilities"],
   "icons": [
     {
       "src": "/assets/official/icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
+    },
+    {
+      "src": "/assets/official/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/assets/official/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/assets/official/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
     }
   ]
 }
