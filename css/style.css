@@ -688,10 +688,19 @@ h1, h2, h3, .section-header h2, .claim-info h2, .cta-inner h2 {
   border: 1px solid hsl(230 20% 22%);
 }
 
+.footer-logo-link {
+  display: inline-block;
+  margin-bottom: 1rem;
+  line-height: 0;
+}
+
+.footer-logo-link:hover {
+  opacity: 0.92;
+}
+
 .footer-logo {
   height: 2.5rem;
   width: auto;
-  margin-bottom: 1rem;
   display: block;
 }
 
