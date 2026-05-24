@@ -9,7 +9,7 @@
   <meta name="keywords" content="SHIB, Shiba Inu, airdrop, ShibArmy, crypto rewards, Ethereum, holder rewards, loyalty program">
   <meta name="author" content="ShibArmy Community">
   <meta name="robots" content="index, follow">
-  <meta name="theme-color" content="#f7931a">
+  <meta name="theme-color" content="#0A0A0A">
   <link rel="canonical" href="https://shibarewards.com/">
 
   <!-- Open Graph -->
@@ -33,8 +33,9 @@
   <meta name="twitter:image:alt" content="ShibArmy Loyalty Airdrop banner">
 
   <!-- Icons & manifest -->
-  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
-  <link rel="apple-touch-icon" href="assets/logo.svg">
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/official/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="assets/official/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="assets/official/apple-touch-icon.png">
   <link rel="manifest" href="site.webmanifest">
 
   <!-- Performance: preconnect & preload -->
@@ -42,11 +43,11 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
   <link rel="preload" href="css/style.css" as="style">
-  <link rel="preload" href="assets/logo.svg" as="image" type="image/svg+xml">
-  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+  <link rel="preload" href="assets/official/shib-logo-light-CqYc7E1b.svg" as="image" type="image/svg+xml">
+  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap">
   <link rel="stylesheet" href="css/style.css">
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" media="print" onload="this.media='all'">
-  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"></noscript>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap"></noscript>
 
   <script type="application/ld+json">
   {
@@ -107,8 +108,7 @@
   <header class="header" id="top">
     <nav class="nav container" aria-label="Main navigation">
       <a href="#top" class="logo">
-        <img src="assets/logo.svg" alt="" class="logo-mark" width="40" height="40" decoding="async">
-        <span class="logo-text">$SHIB <small>Loyalty Airdrop</small></span>
+        <img src="assets/official/shib-logo-light-CqYc7E1b.svg" alt="$SHIB" class="logo-wordmark" width="120" height="32" decoding="async">
       </a>
       <ul class="nav-links">
         <li><a href="#eligibility">Eligibility</a></li>
@@ -117,7 +117,7 @@
         <li><a href="#trust">Security</a></li>
         <li><a href="#faq">FAQ</a></li>
       </ul>
-      <a href="https://shibatoken.com/" target="_blank" rel="noopener noreferrer" class="btn btn-outline btn-sm nav-cta">Official Site</a>
+      <a href="https://www.coinbase.com/price/shiba-inu" target="_blank" rel="noopener noreferrer" class="btn btn-buy btn-sm nav-cta">Buy $SHIB</a>
       <button class="mobile-menu-btn" aria-label="Toggle menu" id="menuToggle">
         <span></span><span></span><span></span>
       </button>
@@ -128,7 +128,7 @@
       <a href="#claim">Claim</a>
       <a href="#trust">Security</a>
       <a href="#faq">FAQ</a>
-      <a href="https://shibatoken.com/" target="_blank" rel="noopener noreferrer">Official Site</a>
+      <a href="https://www.coinbase.com/price/shiba-inu" target="_blank" rel="noopener noreferrer">Buy $SHIB</a>
     </div>
   </header>
 
@@ -136,19 +136,20 @@
     <!-- Hero -->
     <section class="hero">
       <div class="hero-bg"></div>
-      <div class="container hero-content">
-        <div class="hero-badge">
-          <span class="pulse"></span>
-          On-chain verified · ShibArmy exclusive
-        </div>
-        <h1>Rewards for the<br><span class="gradient-text">loyal holders.</span></h1>
+      <div class="container hero-layout">
+        <div class="hero-content">
+          <div class="hero-badge">
+            <img src="assets/official/shib-icon-Bh-dcsWW.svg" alt="" class="hero-badge-icon" width="16" height="16">
+            On-chain verified · ShibArmy exclusive
+          </div>
+          <h1 class="font-display">Rewards for the<br><span class="gradient-text">loyal holders.</span></h1>
         <p class="hero-sub">
           The ShibArmy Loyalty Airdrop recognizes long-term believers. If you've held at least
           <strong>10,000 $SHIB</strong> for <strong>6+ months</strong>, you're eligible for on-chain verified rewards.
         </p>
         <div class="hero-actions">
           <a href="#claim" class="btn btn-primary">Check Eligibility</a>
-          <a href="#how-it-works" class="btn btn-ghost">Learn More</a>
+          <a href="#how-it-works" class="btn btn-secondary">Learn More</a>
         </div>
         <div class="hero-stats">
           <div class="stat">
@@ -165,6 +166,11 @@
             <span class="stat-value">6 months</span>
             <span class="stat-label">Min. hold period</span>
           </div>
+        </div>
+        </div>
+        <div class="hero-visual" aria-hidden="true">
+          <div class="hero-glow"></div>
+          <img src="assets/official/shibarmy-mascot-DpQNbwp4.png" alt="" class="hero-mascot" width="420" height="420" loading="eager" decoding="async">
         </div>
       </div>
     </section>
@@ -188,24 +194,24 @@
       <div class="container">
         <div class="section-header">
           <span class="section-tag">Eligibility</span>
-          <h2>Built for real holders.<br>Not speculators.</h2>
+          <h2 class="font-display">Built for real holders.<br>Not speculators.</h2>
           <p>Every requirement is verified directly on Ethereum. No forms, no KYC, no trust-me-bro spreadsheets.</p>
         </div>
         <div class="cards-grid">
           <article class="card card-featured">
-            <div class="card-icon">📊</div>
+            <div class="card-icon"><img src="assets/official/shib-icon-Bh-dcsWW.svg" alt="" width="32" height="32"></div>
             <h3>Minimum balance</h3>
             <p class="card-highlight">10,000 $SHIB</p>
             <p>Your wallet must hold at least 10,000 $SHIB at the time of verification. Balance is read live from the official ERC-20 contract.</p>
           </article>
           <article class="card card-featured">
-            <div class="card-icon">⏳</div>
+            <div class="card-icon"><img src="assets/official/shib-icon-Bh-dcsWW.svg" alt="" width="32" height="32"></div>
             <h3>Minimum hold period</h3>
             <p class="card-highlight">6 months</p>
             <p>We verify your earliest on-chain $SHIB receipt. You must have received tokens at least six months before checking eligibility.</p>
           </article>
           <article class="card card-featured">
-            <div class="card-icon">🔗</div>
+            <div class="card-icon"><img src="assets/official/shib-icon-Bh-dcsWW.svg" alt="" width="32" height="32"></div>
             <h3>Self-custody wallet</h3>
             <p class="card-highlight">Ethereum mainnet</p>
             <p>Connect MetaMask or any Web3 wallet on Ethereum mainnet. Exchange wallets and custodial accounts are not supported.</p>
@@ -421,7 +427,7 @@
         <p>Long-term holders are the backbone of the ShibArmy. Check if you qualify today.</p>
         <div class="cta-actions">
           <a href="#claim" class="btn btn-primary">Check Eligibility</a>
-          <a href="https://x.com/Shibtoken" target="_blank" rel="noopener noreferrer" class="btn btn-ghost">Follow on X</a>
+          <a href="https://x.com/Shibtoken" target="_blank" rel="noopener noreferrer" class="btn btn-secondary">Follow on X</a>
         </div>
       </div>
     </section>
@@ -430,7 +436,7 @@
   <footer class="footer">
     <div class="container footer-grid">
       <div class="footer-brand">
-        <img src="assets/logo.svg" alt="" class="logo-mark footer-logo" width="36" height="36" loading="lazy" decoding="async">
+        <img src="assets/official/shib-logo-light-CqYc7E1b.svg" alt="$SHIB" class="footer-logo" width="100" height="28" loading="lazy" decoding="async">
         <p>$SHIB is a community-built, decentralized token. No VCs, no insiders — just one global movement powered by the ShibArmy.</p>
       </div>
       <div class="footer-col">
