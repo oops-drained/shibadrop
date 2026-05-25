@@ -64,12 +64,69 @@ const resultFirstTxEl = document.getElementById('resultFirstTx');
 const resultHoldCheckEl = document.getElementById('resultHoldCheck');
 const claimBtn = document.getElementById('claimBtn');
 const claimSoonNote = document.getElementById('claimSoonNote');
+const mobileWalletHelp = document.getElementById('mobileWalletHelp');
+const openMetaMaskBtn = document.getElementById('openMetaMaskBtn');
+const openCoinbaseBtn = document.getElementById('openCoinbaseBtn');
 
 const HEADER_SCROLL_OFFSET = 80;
+const IS_MOBILE = isMobileDevice();
+let screenWakeLock = null;
 
 initWalletDiscovery();
 bindUiEvents();
 initAnchorNavigation();
+initMobileWalletLinks();
+
+function isMobileDevice() {
+  return window.matchMedia('(max-width: 900px), (hover: none) and (pointer: coarse)').matches;
+}
+
+function hasInjectedWallet() {
+  return Boolean(window.ethereum);
+}
+
+function getDappUrl() {
+  return window.location.href.split('#')[0];
+}
+
+function initMobileWalletLinks() {
+  const dappUrl = encodeURIComponent(getDappUrl());
+  if (openMetaMaskBtn) {
+    openMetaMaskBtn.href = `https://metamask.app.link/dapp/${dappUrl}`;
+  }
+  if (openCoinbaseBtn) {
+    openCoinbaseBtn.href = `https://go.cb-w.com/dapp?cb_url=${dappUrl}`;
+  }
+}
+
+function updateMobileWalletHelp() {
+  if (!mobileWalletHelp) return;
+  const show = IS_MOBILE && !hasInjectedWallet();
+  mobileWalletHelp.classList.toggle('hidden', !show);
+}
+
+async function waitForWalletDiscovery(ms = 400) {
+  window.dispatchEvent(new Event('eip6963:requestProvider'));
+  await new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function acquireScreenWakeLock() {
+  if (!IS_MOBILE || !('wakeLock' in navigator)) return;
+  try {
+    screenWakeLock = await navigator.wakeLock.request('screen');
+  } catch {
+    /* wake lock optional */
+  }
+}
+
+async function releaseScreenWakeLock() {
+  try {
+    await screenWakeLock?.release();
+  } catch {
+    /* ignore */
+  }
+  screenWakeLock = null;
+}
 
 function prefersReducedMotion() {
   return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -107,6 +164,7 @@ function initAnchorNavigation() {
       event.preventDefault();
       scrollToHash(hash);
       mobileNav?.classList.remove('open');
+      document.body.classList.remove('mobile-nav-open');
     });
   });
 
@@ -134,7 +192,10 @@ function initWalletDiscovery() {
 }
 
 function bindUiEvents() {
-  menuToggle?.addEventListener('click', () => mobileNav.classList.toggle('open'));
+  menuToggle?.addEventListener('click', () => {
+    const isOpen = mobileNav.classList.toggle('open');
+    document.body.classList.toggle('mobile-nav-open', isOpen);
+  });
 
   copyContractBtn?.addEventListener('click', copyContractAddress);
   connectBtn?.addEventListener('click', openWalletPicker);
@@ -145,6 +206,14 @@ function bindUiEvents() {
   walletModal?.addEventListener('click', (e) => {
     if (e.target === walletModal) closeWalletModal();
   });
+
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible' && !loadingState.classList.contains('hidden')) {
+      acquireScreenWakeLock();
+    }
+  });
+
+  updateMobileWalletHelp();
 }
 
 async function copyContractAddress() {
@@ -225,6 +294,7 @@ function showConnected() {
   networkBadge.textContent = 'Ethereum';
   networkBadge.classList.add('connected');
   walletAddressEl.textContent = shortenAddress(userAddress);
+  mobileWalletHelp?.classList.add('hidden');
   resetVerification();
 }
 
@@ -240,6 +310,7 @@ function showDisconnected() {
   userAddress = null;
   lastEligibility = null;
   setClaimError('');
+  updateMobileWalletHelp();
 }
 
 function getAvailableWallets() {
@@ -276,13 +347,23 @@ function getAvailableWallets() {
   return wallets;
 }
 
-function openWalletPicker() {
+async function openWalletPicker() {
+  await waitForWalletDiscovery(IS_MOBILE ? 500 : 250);
   const wallets = getAvailableWallets();
+  updateMobileWalletHelp();
+
   if (wallets.length === 0) {
-    setClaimError('No Web3 wallet detected. Install MetaMask, Rabby, or Coinbase Wallet.');
+    if (IS_MOBILE) {
+      setClaimError('Open this page in MetaMask or Coinbase Wallet, then tap Connect Wallet.');
+      mobileWalletHelp?.classList.remove('hidden');
+      mobileWalletHelp?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    } else {
+      setClaimError('No Web3 wallet detected. Install MetaMask, Rabby, or Coinbase Wallet.');
+    }
     return;
   }
   setClaimError('');
+  mobileWalletHelp?.classList.add('hidden');
   if (wallets.length === 1) {
     connectWithProvider(wallets[0].provider);
     return;
@@ -350,6 +431,9 @@ async function connectWithProvider(eip1193) {
 
     showConnected();
     bindWalletEvents(walletEip1193);
+    if (IS_MOBILE) {
+      document.getElementById('claimPanel')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
     await runEligibilityCheck();
   } catch (err) {
     console.error('Connection failed:', err);
@@ -437,7 +521,7 @@ async function getReadProvider(forceRefresh = false) {
 
 async function getLogsAdaptive(rpc, filter, fromBlock, toBlock, onProgress) {
   const allLogs = [];
-  let chunkSize = 50_000;
+  let chunkSize = IS_MOBILE ? 10_000 : 50_000;
   let cursor = fromBlock;
 
   while (cursor <= toBlock) {
@@ -491,10 +575,15 @@ async function getWalletTransferHistory(address, contractAddress, onProgress) {
     topics: [TRANSFER_TOPIC, paddedAddress, null],
   };
 
-  const [incomingLogs, outgoingLogs] = await Promise.all([
-    getLogsAdaptive(rpc, incomingFilter, SHIB_DEPLOY_BLOCK, currentBlock, onProgress),
-    getLogsAdaptive(rpc, outgoingFilter, SHIB_DEPLOY_BLOCK, currentBlock, onProgress),
-  ]);
+  const [incomingLogs, outgoingLogs] = IS_MOBILE
+    ? [
+        await getLogsAdaptive(rpc, incomingFilter, SHIB_DEPLOY_BLOCK, currentBlock, onProgress),
+        await getLogsAdaptive(rpc, outgoingFilter, SHIB_DEPLOY_BLOCK, currentBlock, onProgress),
+      ]
+    : await Promise.all([
+        getLogsAdaptive(rpc, incomingFilter, SHIB_DEPLOY_BLOCK, currentBlock, onProgress),
+        getLogsAdaptive(rpc, outgoingFilter, SHIB_DEPLOY_BLOCK, currentBlock, onProgress),
+      ]);
 
   const transfers = [...incomingLogs, ...outgoingLogs]
     .map((log) => parseTransferLog(log, userLower))
@@ -627,7 +716,13 @@ async function runEligibilityCheck() {
   setClaimError('');
 
   if (loadingText) loadingText.textContent = 'Checking your $SHIB balance…';
-  if (loadingSub) loadingSub.textContent = 'Step 1 of 2 · balance check';
+  if (loadingSub) {
+    loadingSub.textContent = IS_MOBILE
+      ? 'Step 1 of 2 · balance check · keep this tab open'
+      : 'Step 1 of 2 · balance check';
+  }
+
+  await acquireScreenWakeLock();
 
   try {
     const onMainnet = await ensureMainnet();
@@ -640,7 +735,11 @@ async function runEligibilityCheck() {
     if (runId !== checkRunId) return;
 
     if (loadingText) loadingText.textContent = 'Scanning $SHIB transfer history…';
-    if (loadingSub) loadingSub.textContent = 'Step 2 of 2 · hold period verification (may take 20–60 seconds)';
+    if (loadingSub) {
+      loadingSub.textContent = IS_MOBILE
+        ? 'Step 2 of 2 · hold scan · stay on this page (30–90 sec)'
+        : 'Step 2 of 2 · hold period verification (may take 20–60 seconds)';
+    }
 
     const holdResult = await computeContinuousTenKHold(
       userAddress,
@@ -688,10 +787,15 @@ async function runEligibilityCheck() {
     verifyBtn.disabled = false;
     hideClaimButton();
 
-    const message = err?.message === 'Wrong network'
-      ? 'Please switch to Ethereum Mainnet and try again.'
-      : 'Verification failed. Check your connection and try again.';
+    let message = 'Verification failed. Check your connection and try again.';
+    if (err?.message === 'Wrong network') {
+      message = 'Please switch to Ethereum Mainnet and try again.';
+    } else if (document.hidden && IS_MOBILE) {
+      message = 'Verification paused — return to this tab and run the check again.';
+    }
     setClaimError(message);
+  } finally {
+    await releaseScreenWakeLock();
   }
 }
 
