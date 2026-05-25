@@ -201,7 +201,6 @@ function bindUiEvents() {
   connectBtn?.addEventListener('click', openWalletPicker);
   disconnectBtn?.addEventListener('click', disconnectWallet);
   verifyBtn?.addEventListener('click', () => runEligibilityCheck());
-  claimBtn?.addEventListener('click', handleClaim);
   walletModalClose?.addEventListener('click', closeWalletModal);
   walletModal?.addEventListener('click', (e) => {
     if (e.target === walletModal) closeWalletModal();
@@ -252,9 +251,21 @@ function hideClaimButton() {
 
 function showClaimButton() {
   claimBtn?.classList.remove('hidden');
-  claimSoonNote?.classList.toggle('hidden', Boolean(AIRDROP_CLAIM_CONTRACT));
-  if (claimSoonNote && AIRDROP_CLAIM_CONTRACT) {
-    claimSoonNote.textContent = 'Sign the claim transaction in your wallet. Gas fees apply.';
+  claimSoonNote?.classList.remove('hidden');
+
+  if (AIRDROP_CLAIM_CONTRACT) {
+    claimBtn?.removeAttribute('disabled');
+    claimBtn?.removeAttribute('aria-disabled');
+    if (claimSoonNote) {
+      claimSoonNote.textContent = 'Sign the claim transaction in your wallet. Gas fees apply.';
+    }
+    return;
+  }
+
+  claimBtn?.setAttribute('disabled', 'true');
+  claimBtn?.setAttribute('aria-disabled', 'true');
+  if (claimSoonNote) {
+    claimSoonNote.textContent = 'Claim functionality will be enabled in a future update.';
   }
 }
 
@@ -799,8 +810,9 @@ async function runEligibilityCheck() {
   }
 }
 
+// Claim handler wired when AIRDROP_CLAIM_CONTRACT is configured.
 async function handleClaim() {
-  if (!provider || !userAddress) return;
+  if (!AIRDROP_CLAIM_CONTRACT || !provider || !userAddress) return;
 
   claimBtn.disabled = true;
   setClaimError('');

@@ -1040,6 +1040,12 @@ body.mobile-nav-open .mobile-nav.open {
   margin-top: 16px;
 }
 
+.claim-btn-claim:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
 .claim-soon-note {
   margin-top: 10px;
   font-size: 0.8rem;
