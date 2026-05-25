@@ -19,6 +19,8 @@ const READ_RPC_URLS = [
   'https://cloudflare-eth.com',
 ];
 
+const ELIGIBILITY_CACHE_TTL_MS = 10 * 60 * 1000;
+
 const ERC20_ABI = [
   'function balanceOf(address owner) view returns (uint256)',
   'function decimals() view returns (uint8)',
@@ -297,6 +299,11 @@ function resetVerification() {
   resultFirstTxEl.textContent = '—';
   resultHoldCheckEl.textContent = '—';
   resultHoldCheckEl.className = 'result-badge';
+  try {
+    if (userAddress) sessionStorage.removeItem(getHoldCacheKey(userAddress));
+  } catch {
+    /* ignore */
+  }
 }
 
 function showConnected() {
@@ -530,9 +537,9 @@ async function getReadProvider(forceRefresh = false) {
   throw new Error('No Ethereum RPC available for verification.');
 }
 
-async function getLogsAdaptive(rpc, filter, fromBlock, toBlock, onProgress) {
+async function fetchLogsRange(rpc, filter, fromBlock, toBlock) {
   const allLogs = [];
-  let chunkSize = IS_MOBILE ? 10_000 : 50_000;
+  let chunkSize = IS_MOBILE ? 25_000 : 100_000;
   let cursor = fromBlock;
 
   while (cursor <= toBlock) {
@@ -543,11 +550,10 @@ async function getLogsAdaptive(rpc, filter, fromBlock, toBlock, onProgress) {
       try {
         const logs = await rpc.getLogs({ ...filter, fromBlock: cursor, toBlock: chunkEnd });
         allLogs.push(...logs);
-        if (onProgress) onProgress(chunkEnd, toBlock);
         cursor = chunkEnd + 1;
         success = true;
-      } catch (err) {
-        if (chunkSize <= 2_000) throw err;
+      } catch {
+        if (chunkSize <= 2_000) throw new Error('RPC log scan failed');
         chunkSize = Math.max(2_000, Math.floor(chunkSize / 2));
       }
     }
@@ -556,22 +562,11 @@ async function getLogsAdaptive(rpc, filter, fromBlock, toBlock, onProgress) {
   return allLogs;
 }
 
-function parseTransferLog(log, userAddressLower) {
-  const from = ethers.getAddress(`0x${log.topics[1].slice(26)}`);
-  const to = ethers.getAddress(`0x${log.topics[2].slice(26)}`);
-  const value = ethers.getBigInt(log.data);
-  const direction = to.toLowerCase() === userAddressLower ? 'in' : 'out';
-  return {
-    blockNumber: log.blockNumber,
-    logIndex: log.index,
-    from,
-    to,
-    value,
-    direction,
-  };
-}
-
-async function getWalletTransferHistory(address, contractAddress, onProgress) {
+/**
+ * Reverse block scan: walks transfers newest→oldest and stops once the current
+ * 10k+ holding streak start is found (skips years of history for most wallets).
+ */
+async function findStreakStartBlock(address, contractAddress, currentBalance, minBalanceRaw, onProgress) {
   const userLower = address.toLowerCase();
   const paddedAddress = ethers.zeroPadValue(address, 32);
   const rpc = await getReadProvider();
@@ -586,21 +581,77 @@ async function getWalletTransferHistory(address, contractAddress, onProgress) {
     topics: [TRANSFER_TOPIC, paddedAddress, null],
   };
 
-  const [incomingLogs, outgoingLogs] = IS_MOBILE
-    ? [
-        await getLogsAdaptive(rpc, incomingFilter, SHIB_DEPLOY_BLOCK, currentBlock, onProgress),
-        await getLogsAdaptive(rpc, outgoingFilter, SHIB_DEPLOY_BLOCK, currentBlock, onProgress),
-      ]
-    : await Promise.all([
-        getLogsAdaptive(rpc, incomingFilter, SHIB_DEPLOY_BLOCK, currentBlock, onProgress),
-        getLogsAdaptive(rpc, outgoingFilter, SHIB_DEPLOY_BLOCK, currentBlock, onProgress),
-      ]);
+  let balance = currentBalance;
+  let streakStartBlock = null;
+  let firstIncomingBlock = null;
+  const chunkSize = IS_MOBILE ? 25_000 : 100_000;
+  let chunkEnd = currentBlock;
+  const scanSpan = Math.max(1, currentBlock - SHIB_DEPLOY_BLOCK);
 
-  const transfers = [...incomingLogs, ...outgoingLogs]
-    .map((log) => parseTransferLog(log, userLower))
-    .sort((a, b) => a.blockNumber - b.blockNumber || a.logIndex - b.logIndex);
+  while (chunkEnd >= SHIB_DEPLOY_BLOCK) {
+    const chunkStart = Math.max(chunkEnd - chunkSize + 1, SHIB_DEPLOY_BLOCK);
 
-  return transfers;
+    const [incomingLogs, outgoingLogs] = await Promise.all([
+      fetchLogsRange(rpc, incomingFilter, chunkStart, chunkEnd),
+      fetchLogsRange(rpc, outgoingFilter, chunkStart, chunkEnd),
+    ]);
+
+    const transfers = [...incomingLogs, ...outgoingLogs]
+      .map((log) => parseTransferLog(log, userLower))
+      .sort((a, b) => b.blockNumber - a.blockNumber || b.logIndex - a.logIndex);
+
+    for (const transfer of transfers) {
+      if (transfer.direction === 'in') {
+        if (firstIncomingBlock === null || transfer.blockNumber < firstIncomingBlock) {
+          firstIncomingBlock = transfer.blockNumber;
+        }
+        balance -= transfer.value;
+        if (balance < minBalanceRaw) {
+          streakStartBlock = transfer.blockNumber;
+          return streakStartBlock;
+        }
+      } else {
+        balance += transfer.value;
+      }
+    }
+
+    if (onProgress) {
+      const scanned = currentBlock - chunkStart;
+      onProgress(Math.min(scanned, scanSpan), scanSpan);
+    }
+
+    chunkEnd = chunkStart - 1;
+  }
+
+  return streakStartBlock ?? firstIncomingBlock;
+}
+
+function getHoldCacheKey(address) {
+  return `shib-hold-v3-${address.toLowerCase()}`;
+}
+
+function readHoldCache(address, currentBlock) {
+  try {
+    const raw = sessionStorage.getItem(getHoldCacheKey(address));
+    if (!raw) return null;
+    const cached = JSON.parse(raw);
+    if (Date.now() - cached.ts > ELIGIBILITY_CACHE_TTL_MS) return null;
+    if (cached.blockNumber < currentBlock - 50) return null;
+    return cached.payload;
+  } catch {
+    return null;
+  }
+}
+
+function writeHoldCache(address, currentBlock, payload) {
+  try {
+    sessionStorage.setItem(
+      getHoldCacheKey(address),
+      JSON.stringify({ ts: Date.now(), blockNumber: currentBlock, payload })
+    );
+  } catch {
+    /* storage full or private mode */
+  }
 }
 
 async function computeContinuousTenKHold(address, contractAddress, decimals, onProgress) {
@@ -608,31 +659,41 @@ async function computeContinuousTenKHold(address, contractAddress, decimals, onP
   const rpc = await getReadProvider();
   const contract = new ethers.Contract(contractAddress, ERC20_ABI, rpc);
   const currentBalance = await contract.balanceOf(address);
-
-  const transfers = await getWalletTransferHistory(address, contractAddress, onProgress);
-
-  let balance = 0n;
-  let streakStartBlock = null;
-
-  for (const transfer of transfers) {
-    if (transfer.direction === 'in') {
-      balance += transfer.value;
-    } else {
-      balance -= transfer.value;
-    }
-
-    if (balance >= minBalanceRaw) {
-      if (streakStartBlock === null) streakStartBlock = transfer.blockNumber;
-    } else {
-      streakStartBlock = null;
-    }
-  }
-
   const balanceOk = currentBalance >= minBalanceRaw;
 
-  if (!balanceOk || streakStartBlock === null) {
+  if (!balanceOk) {
     return {
-      balanceOk,
+      balanceOk: false,
+      holdOk: false,
+      currentBalance,
+      daysHeld: 0,
+      streakStartDate: null,
+      streakStartBlock: null,
+    };
+  }
+
+  const currentBlock = await rpc.getBlockNumber();
+  const cached = readHoldCache(address, currentBlock);
+  if (cached) {
+    return {
+      ...cached,
+      currentBalance,
+      balanceOk: true,
+      streakStartDate: cached.streakStartDate ? new Date(cached.streakStartDate) : null,
+    };
+  }
+
+  const streakStartBlock = await findStreakStartBlock(
+    address,
+    contractAddress,
+    currentBalance,
+    minBalanceRaw,
+    onProgress
+  );
+
+  if (!streakStartBlock) {
+    return {
+      balanceOk: true,
       holdOk: false,
       currentBalance,
       daysHeld: 0,
@@ -646,13 +707,31 @@ async function computeContinuousTenKHold(address, contractAddress, decimals, onP
   const daysHeld = Math.floor((now - block.timestamp) / 86400);
   const holdOk = daysHeld >= MIN_HOLD_DAYS;
 
-  return {
-    balanceOk,
+  const payload = {
+    balanceOk: true,
     holdOk,
     currentBalance,
     daysHeld,
     streakStartDate: new Date(block.timestamp * 1000),
     streakStartBlock,
+  };
+
+  writeHoldCache(address, currentBlock, payload);
+  return payload;
+}
+
+function parseTransferLog(log, userAddressLower) {
+  const from = ethers.getAddress(`0x${log.topics[1].slice(26)}`);
+  const to = ethers.getAddress(`0x${log.topics[2].slice(26)}`);
+  const value = ethers.getBigInt(log.data);
+  const direction = to.toLowerCase() === userAddressLower ? 'in' : 'out';
+  return {
+    blockNumber: log.blockNumber,
+    logIndex: log.index,
+    from,
+    to,
+    value,
+    direction,
   };
 }
 
@@ -748,18 +827,20 @@ async function runEligibilityCheck() {
     if (loadingText) loadingText.textContent = 'Scanning $SHIB transfer history…';
     if (loadingSub) {
       loadingSub.textContent = IS_MOBILE
-        ? 'Step 2 of 2 · hold scan · stay on this page (30–90 sec)'
-        : 'Step 2 of 2 · hold period verification (may take 20–60 seconds)';
+        ? 'Step 2 of 2 · optimized reverse scan · keep tab open'
+        : 'Step 2 of 2 · optimized reverse scan (usually 10–40 sec)';
     }
 
     const holdResult = await computeContinuousTenKHold(
       userAddress,
       SHIB_CONTRACT,
       decimals,
-      (done, total) => {
+      (scanned, total) => {
         if (runId !== checkRunId || !loadingSub) return;
-        const pct = Math.min(100, Math.round((done / total) * 100));
-        loadingSub.textContent = `Step 2 of 2 · scanning blocks (${pct}%)`;
+        const pct = Math.min(100, Math.round((scanned / total) * 100));
+        loadingSub.textContent = IS_MOBILE
+          ? `Step 2 of 2 · scanning (${pct}%) · keep tab open`
+          : `Step 2 of 2 · scanning (${pct}%)`;
       }
     );
 
