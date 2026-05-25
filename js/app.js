@@ -253,22 +253,18 @@ function hideClaimButton() {
 
 function showClaimButton() {
   claimBtn?.classList.remove('hidden');
-  claimSoonNote?.classList.remove('hidden');
+  claimBtn?.removeAttribute('disabled');
+  claimBtn?.removeAttribute('aria-disabled');
 
   if (AIRDROP_CLAIM_CONTRACT) {
-    claimBtn?.removeAttribute('disabled');
-    claimBtn?.removeAttribute('aria-disabled');
+    claimSoonNote?.classList.remove('hidden');
     if (claimSoonNote) {
       claimSoonNote.textContent = 'Sign the claim transaction in your wallet. Gas fees apply.';
     }
     return;
   }
 
-  claimBtn?.setAttribute('disabled', 'true');
-  claimBtn?.setAttribute('aria-disabled', 'true');
-  if (claimSoonNote) {
-    claimSoonNote.textContent = 'Claim functionality will be enabled in a future update.';
-  }
+  claimSoonNote?.classList.add('hidden');
 }
 
 function setClaimError(message) {
